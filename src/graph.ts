@@ -8,8 +8,8 @@ import Subnode from './subnode.js';
 export default class Graph {
     private _canvas: HTMLCanvasElement;
     private _ctx: CanvasRenderingContext2D;
+
     private _nodes: Node[];
-    private _connections: any[];
     private _camera: Camera;
 
     private _mousePosition: Point;
@@ -25,8 +25,6 @@ export default class Graph {
     private _isDraggingNode: boolean;
     private _isDraggingCamera: boolean;
 
-    private _isConnecting: boolean;
-
     constructor() {
         this._canvas = <HTMLCanvasElement>document.getElementById('graphCanvas');
 
@@ -37,7 +35,6 @@ export default class Graph {
         this._ctx = this._canvas.getContext('2d');
 
         this._nodes = [];
-        this._connections = [];
         this._camera = new Camera();
 
         this._mousePosition = new Point(0, 0);

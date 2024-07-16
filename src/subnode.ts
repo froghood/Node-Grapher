@@ -32,19 +32,23 @@ export default class Subnode extends BaseNode {
             this.label = (<HTMLInputElement>e.target).value;
             App.graph.saveNodes();
         });
-        App.ui.addInput('color', 'color', 'rgb(0,0,0,1)', () => {});
-        App.ui.addText('connections');
-        for (const connection of this._connections) {
-            App.ui.addConnection(connection.label, () => {
-                this.removeConnection(connection);
-                connection.removeConnection(this);
-                App.graph.saveConnections();
-            });
+        if (this._connections.size > 0) {
+            App.ui.addText('connections');
+            for (const connection of this._connections) {
+                App.ui.addConnection(connection.label, () => {
+                    this.removeConnection(connection);
+                    connection.removeConnection(this);
+                    App.graph.saveConnections();
+                });
+            }
         }
+
         App.ui.addButton('delete subnode', 'delete', () => {
             this.delete();
             //App.graph.save();
         });
+
+        console.log(this);
     }
 
     deselect() {
@@ -83,8 +87,10 @@ export default class Subnode extends BaseNode {
             if (this === other) continue;
             if (other._isSelected) continue;
 
-            const distance =
-                Math.pow(other._position.x - this._position.x, 2) + Math.pow(other._position.y - this._position.y, 2);
+            const distance = Math.max(
+                Math.pow(other._position.x - this._position.x, 2) + Math.pow(other._position.y - this._position.y, 2),
+                Number.EPSILON
+            );
 
             const angle = Math.atan2(other._position.y - this._position.y, other._position.x - this._position.x);
 
@@ -92,8 +98,11 @@ export default class Subnode extends BaseNode {
         }
 
         for (const other of this._connections) {
-            const distance = Math.sqrt(
-                Math.pow(other.position.x - this.position.x, 2) + Math.pow(other.position.y - this.position.y, 2)
+            const distance = Math.max(
+                Math.sqrt(
+                    Math.pow(other.position.x - this.position.x, 2) + Math.pow(other.position.y - this.position.y, 2)
+                ),
+                Number.EPSILON
             );
 
             velocity = velocity.add(

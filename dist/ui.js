@@ -51,7 +51,10 @@ export default class UI {
         const buttonElement = document.createElement('button');
         buttonElement.innerText = 'x';
         buttonElement.className = 'smallDelete';
-        buttonElement.addEventListener('click', callback);
+        buttonElement.addEventListener('click', (e) => {
+            callback(e);
+            this.div.removeChild(labelElement);
+        });
         labelElement.appendChild(buttonElement);
         this.div.appendChild(labelElement);
     }

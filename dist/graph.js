@@ -14,7 +14,6 @@ export default class Graph {
         this._canvas.addEventListener('contextmenu', (e) => e.preventDefault());
         this._ctx = this._canvas.getContext('2d');
         this._nodes = [];
-        this._connections = [];
         this._camera = new Camera();
         this._mousePosition = new Point(0, 0);
         this._mouseWorldPosition = new Point(0, 0);

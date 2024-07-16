@@ -40,7 +40,7 @@ export default class Node extends BaseNode {
         this._isSelected = true;
         App.ui.clear();
         App.ui.addText('node');
-        App.ui.addInput('label', 'text', this.label, (e) => {
+        App.ui.addInput('label', '', this.label, (e) => {
             this.label = e.target.value;
             App.graph.saveNodes();
         });
@@ -51,17 +51,19 @@ export default class Node extends BaseNode {
             }
             App.graph.saveNodes();
         });
-        App.ui.addInput('image', 'text', this._image.imageURL, (e) => {
+        App.ui.addInput('image', 'url', this._image.imageURL, (e) => {
             this._image.setURL(e.target.value);
             App.graph.saveNodes();
         });
-        App.ui.addText('connections');
-        for (const connection of this._connections) {
-            App.ui.addConnection(connection.label, () => {
-                this.removeConnection(connection);
-                connection.removeConnection(this);
-                App.graph.saveConnections();
-            });
+        if (this._connections.size > 0) {
+            App.ui.addText('connections');
+            for (const connection of this._connections) {
+                App.ui.addConnection(connection.label, () => {
+                    this.removeConnection(connection);
+                    connection.removeConnection(this);
+                    App.graph.saveConnections();
+                });
+            }
         }
         App.ui.addButton('create subnode', '', () => {
             this.createSubnode();
@@ -71,6 +73,7 @@ export default class Node extends BaseNode {
             this.delete();
             //App.graph.saveNodes();
         });
+        console.log(this);
     }
     deselect() {
         this._isSelected = false;
@@ -79,6 +82,12 @@ export default class Node extends BaseNode {
     }
     move(position, offset) {
         this._position = new Point(position.x - offset.x, position.y - offset.y);
+    }
+    delete() {
+        this._isDeleted = true;
+        for (const subnode of this._subnodes) {
+            subnode.delete();
+        }
     }
     preUpdate() {
         let nodeDeleted = false;
@@ -130,16 +139,7 @@ export default class Node extends BaseNode {
             ctx.drawImage(this._image.element, this._position.x, this._position.y, scaledWidth, scaledHeight);
             ctx.restore();
         }
-        ctx.save();
-        ctx.font = '32px serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.strokeStyle = 'black';
-        ctx.lineWidth = 6;
-        ctx.strokeText(this.label, this._position.x, this._position.y);
-        ctx.fillStyle = 'white';
-        ctx.fillText(this.label, this._position.x, this._position.y);
-        ctx.restore();
+        this.renderLabel(ctx);
         if (this._isSelected) {
             this.renderSelected(ctx);
         }
@@ -150,11 +150,23 @@ export default class Node extends BaseNode {
             subnode.render(ctx);
         }
     }
-    delete() {
-        this._isDeleted = true;
-        for (const subnode of this._subnodes) {
-            subnode.delete();
+    renderLabel(ctx) {
+        const lines = this.label.split('\\n');
+        const lineSpacing = 48;
+        //console.log(lines);
+        ctx.save();
+        ctx.font = '32px serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.strokeStyle = 'black';
+        ctx.lineWidth = 6;
+        ctx.fillStyle = 'white';
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            ctx.strokeText(line, this._position.x, this._position.y + i * lineSpacing - (lineSpacing * (lines.length - 1)) / 2);
+            ctx.fillText(line, this._position.x, this._position.y + i * lineSpacing - (lineSpacing * (lines.length - 1)) / 2);
         }
+        ctx.restore();
     }
     renderConnections(ctx) {
         ctx.save();
