@@ -3,7 +3,10 @@ import App from './app.js';
 import Subnode from './subnode.js';
 import Point from './point.js';
 import NodeImage from './image.js';
-import UI from './ui.js';
+
+import { Circle } from './drawables/circle.js';
+import { Line } from './drawables/line.js';
+import { Text } from './drawables/text.js';
 
 export default class Node extends BaseNode {
     private _subnodes: Subnode[];
@@ -70,18 +73,16 @@ export default class Node extends BaseNode {
             this._image.setURL((<HTMLInputElement>e.target).value);
             App.graph.saveNodes();
         });
-
         if (this._connections.size > 0) {
             App.ui.addText('connections');
             for (const connection of this._connections) {
-                App.ui.addConnection(connection.label, () => {
+                App.ui.addConnection(connection.label.replace('\\n', ' '), () => {
                     this.removeConnection(connection);
                     connection.removeConnection(this);
                     App.graph.saveConnections();
                 });
             }
         }
-
         App.ui.addButton('create subnode', '', () => {
             this.createSubnode();
             App.graph.saveNodes();
@@ -139,116 +140,58 @@ export default class Node extends BaseNode {
         }
     }
 
-    render(ctx: CanvasRenderingContext2D) {
-        this.renderConnections(ctx);
+    render() {
+        const circle = new Circle(this._position, this.radius);
+        circle.strokeWidth = 4;
+        circle.strokeOffset = 1;
+        circle.strokeColor = 'rgb(100,100,140)';
+        circle.fillColor = 'black';
+        if (this._image.isLoaded) circle.image = this._image.element;
+        App.graph.draw(circle, 1);
 
-        ctx.save();
-        ctx.beginPath();
-        ctx.ellipse(this._position.x, this._position.y, this.radius, this.radius, 0, 0, 360, false);
-        ctx.lineWidth = 8;
-        ctx.strokeStyle = 'rgb(100,100,140)';
-        ctx.stroke();
-        ctx.fillStyle = 'black';
-        ctx.fill();
-        ctx.restore();
+        this.renderConnections();
+        this.renderLabel();
 
-        if (this._image.isLoaded) {
-            ctx.save();
-
-            ctx.beginPath();
-            ctx.ellipse(this._position.x, this._position.y, this.radius, this.radius, 0, 0, 360, false);
-            ctx.clip();
-
-            const minDimension = Math.min(this._image.size.x, this._image.size.y);
-            const scaleFactor = (this.radius * 2) / minDimension;
-
-            const scaledWidth = this._image.size.x * scaleFactor;
-            const scaledHeight = this._image.size.y * scaleFactor;
-
-            ctx.translate(scaledWidth / -2, scaledHeight / -2);
-            ctx.drawImage(this._image.element, this._position.x, this._position.y, scaledWidth, scaledHeight);
-            ctx.restore();
-        }
-
-        this.renderLabel(ctx);
-
-        if (this._isSelected) {
-            this.renderSelected(ctx);
-        }
-
-        if (this._isHighlighted) {
-            this.renderHighlighted(ctx);
-        }
+        if (this._isSelected) this.renderSelected();
 
         for (const subnode of this._subnodes) {
-            subnode.render(ctx);
+            subnode.render();
         }
     }
 
-    private renderLabel(ctx: CanvasRenderingContext2D) {
-        const lines = this.label.split('\\n');
-        const lineSpacing = 48;
+    private renderLabel() {
+        const text = new Text(this.position, this.label);
+        text.fontSize = 32;
+        text.alignment = 'center';
+        text.baseline = 'middle';
+        text.strokeWidth = 4;
 
-        //console.log(lines);
-
-        ctx.save();
-        ctx.font = '32px serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.strokeStyle = 'black';
-        ctx.lineWidth = 6;
-        ctx.fillStyle = 'white';
-
-        for (let i = 0; i < lines.length; i++) {
-            const line = lines[i];
-
-            ctx.strokeText(
-                line,
-                this._position.x,
-                this._position.y + i * lineSpacing - (lineSpacing * (lines.length - 1)) / 2
-            );
-            ctx.fillText(
-                line,
-                this._position.x,
-                this._position.y + i * lineSpacing - (lineSpacing * (lines.length - 1)) / 2
-            );
-        }
-
-        ctx.restore();
+        App.graph.draw(text, 1);
     }
 
-    private renderConnections(ctx: CanvasRenderingContext2D) {
-        ctx.save();
-        ctx.lineWidth = 4;
+    private renderConnections() {
         for (const other of this._connections) {
-            ctx.beginPath();
-            ctx.moveTo(this.position.x, this.position.y);
-            ctx.lineTo(
+            const destination = new Point(
                 this.position.x + (other.position.x - this.position.x) / 2,
                 this.position.y + (other.position.y - this.position.y) / 2
             );
-            ctx.stroke();
+
+            const line = new Line(this.position, destination);
+            line.width = 4;
+            line.color = 'rgb(50,50,100)';
+
+            App.graph.draw(line, 0);
         }
-        ctx.restore();
     }
 
-    private renderSelected(ctx: CanvasRenderingContext2D) {
-        ctx.save();
-        ctx.beginPath();
-        ctx.ellipse(this._position.x, this._position.y, this.radius + 5, this.radius + 5, 0, 0, 360, false);
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = 'white';
-        ctx.stroke();
-        ctx.restore();
-    }
+    private renderSelected() {
+        const circle = new Circle(this.position, this.radius);
+        circle.strokeWidth = 2;
+        circle.strokeOffset = 3;
+        circle.strokeColor = 'white';
+        circle.fillColor = 'rgb(0,0,0,0)';
 
-    private renderHighlighted(ctx: CanvasRenderingContext2D) {
-        ctx.save();
-        ctx.beginPath();
-        ctx.ellipse(this._position.x, this._position.y, this.radius, this.radius, 0, 0, 360, false);
-        ctx.fillStyle = 'rgb(255,255,255,0.05)';
-        ctx.fill();
-        ctx.restore();
+        App.graph.draw(circle, 1);
     }
 
     toJSON(): any {

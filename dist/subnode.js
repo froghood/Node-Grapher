@@ -1,5 +1,8 @@
 import App from './app.js';
 import BaseNode from './base_node.js';
+import { Circle } from './drawables/circle.js';
+import { Line } from './drawables/line.js';
+import { Text } from './drawables/text.js';
 import Point from './point.js';
 export default class Subnode extends BaseNode {
     constructor(parent, position, label) {
@@ -77,23 +80,17 @@ export default class Subnode extends BaseNode {
             this.move(this.position, new Point(this._velocity.x, this._velocity.y));
         this._velocity = new Point(0, 0);
     }
-    render(ctx) {
-        this.renderConnections(ctx);
-        ctx.save();
-        ctx.beginPath();
-        ctx.ellipse(this.position.x, this.position.y, this.radius, this.radius, 0, 0, 360, false);
-        ctx.lineWidth = 8;
-        ctx.strokeStyle = 'rgb(100,100,140)';
-        ctx.stroke();
-        ctx.fillStyle = 'black';
-        ctx.fill();
-        ctx.restore();
-        if (this._isSelected) {
-            this.renderSelected(ctx);
-        }
-        if (this._isHighlighted) {
-            this.renderHighlighted(ctx);
-        }
+    render() {
+        const circle = new Circle(this.position, this.radius);
+        circle.strokeWidth = 4;
+        circle.strokeOffset = 1;
+        circle.strokeColor = 'rgb(100,100,140)';
+        circle.fillColor = 'black';
+        App.graph.draw(circle, 3);
+        this.renderConnections();
+        this.renderLabel();
+        if (this._isSelected)
+            this.renderSelected();
     }
     toJSON() {
         return {
@@ -101,32 +98,33 @@ export default class Subnode extends BaseNode {
             label: this.label,
         };
     }
-    renderConnections(ctx) {
-        ctx.save();
-        ctx.lineWidth = 4;
+    renderConnections() {
         for (const other of this._connections) {
-            ctx.beginPath();
-            ctx.moveTo(this.position.x, this.position.y);
-            ctx.lineTo(this.position.x + (other.position.x - this.position.x) / 2, this.position.y + (other.position.y - this.position.y) / 2);
-            ctx.stroke();
+            const destination = new Point(this.position.x + (other.position.x - this.position.x) / 2, this.position.y + (other.position.y - this.position.y) / 2);
+            const line = new Line(this.position, destination);
+            line.width = 4;
+            line.color = 'rgb(50,50,100)';
+            App.graph.draw(line, 2);
         }
-        ctx.restore();
     }
-    renderSelected(ctx) {
-        ctx.save();
-        ctx.beginPath();
-        ctx.ellipse(this.position.x, this.position.y, this.radius + 5, this.radius + 5, 0, 0, 360, false);
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = 'white';
-        ctx.stroke();
-        ctx.restore();
+    renderLabel() {
+        const offsetX = Math.sign(this._position.x) * 12;
+        const offsetY = Math.sign(this._position.y) * 12;
+        const position = new Point(this.position.x + offsetX, this.position.y + offsetY);
+        const text = new Text(position, this.label);
+        text.font = 'sansserif';
+        text.fontSize = 22;
+        text.alignment = this._position.x < 0 ? 'right' : 'left';
+        text.baseline = this._position.y < 0 ? 'bottom' : 'top';
+        text.strokeWidth = 2;
+        App.graph.draw(text, 4);
     }
-    renderHighlighted(ctx) {
-        ctx.save();
-        ctx.beginPath();
-        ctx.ellipse(this._position.x, this._position.y, this.radius, this.radius, 0, 0, 360, false);
-        ctx.fillStyle = 'rgb(255,255,255,0.05)';
-        ctx.fill();
-        ctx.restore();
+    renderSelected() {
+        const circle = new Circle(this.position, this.radius);
+        circle.strokeWidth = 2;
+        circle.strokeOffset = 3;
+        circle.strokeColor = 'white';
+        circle.fillColor = 'rgb(0,0,0,0)';
+        App.graph.draw(circle, 3);
     }
 }

@@ -4,10 +4,12 @@ import Node from './node.js';
 import Point from './point.js';
 import BaseNode from './base_node.js';
 import Subnode from './subnode.js';
+import { Drawable } from './drawables/drawable.js';
 
 export default class Graph {
     private _canvas: HTMLCanvasElement;
     private _ctx: CanvasRenderingContext2D;
+    private _layers: Drawable[][];
 
     private _nodes: Node[];
     private _camera: Camera;
@@ -33,6 +35,8 @@ export default class Graph {
         this._canvas.addEventListener('contextmenu', (e) => e.preventDefault());
 
         this._ctx = this._canvas.getContext('2d');
+
+        this._layers = [];
 
         this._nodes = [];
         this._camera = new Camera();
@@ -106,7 +110,10 @@ export default class Graph {
     }
 
     render() {
-        //this.ctx.beginPath();
+        for (const node of this._nodes) {
+            node.render();
+        }
+
         this._ctx.fillStyle = 'rgb(30,30,30)';
         this._ctx.fillRect(0, 0, this._canvas.width, this._canvas.height);
 
@@ -114,14 +121,27 @@ export default class Graph {
         this._ctx.scale(this._camera.zoomScale, this._camera.zoomScale);
         this._ctx.translate(-this._camera.position.x, -this._camera.position.y);
 
-        // this.ctx.translate(this.canvas.width / 2 + this.camera.x, this.canvas.height / 2 + this.camera.y);
-        // this.ctx.scale(this.zoomScale, this.zoomScale);
+        for (let i = 0; i < this._layers.length; i++) {
+            const layer = this._layers[i];
 
-        this._nodes.forEach((node) => {
-            node.render(this._ctx);
-        });
+            if (!layer) continue;
+
+            for (const drawable of layer) {
+                drawable.render(this._ctx);
+            }
+
+            this._layers[i] = [];
+        }
 
         this._ctx.setTransform(1, 0, 0, 1, 0, 0);
+    }
+
+    draw(drawable: Drawable, layer: number): void {
+        if (this._layers[layer]) {
+            this._layers[layer].push(drawable);
+        } else {
+            this._layers[layer] = [drawable];
+        }
     }
 
     addNode(node: Node, select: boolean = true): void {
@@ -279,45 +299,55 @@ export default class Graph {
         this._mouseWorldPosition = this.screenSpaceToWorldSpace(position);
     }
 
-    mousedown(shift: boolean): any {
-        if (this._hoveredNode) {
-            if (shift) {
-                this._connectingNode = this._hoveredNode;
+    mousedown(button: number, shift: boolean): any {
+        if (button == 0) {
+            if (this._hoveredNode) {
+                if (shift) {
+                    this._connectingNode = this._hoveredNode;
+                } else {
+                    if (this._selectedNode && this._hoveredNode != this._selectedNode) this.deselectNode();
+                    this.selectNode(this._hoveredNode);
+
+                    this._isDraggingNode = true;
+
+                    this._draggingOffset = new Point(
+                        this._mouseWorldPosition.x - this._selectedNode.position.x,
+                        this._mouseWorldPosition.y - this._selectedNode.position.y
+                    );
+                }
             } else {
-                if (this._selectedNode && this._hoveredNode != this._selectedNode) this.deselectNode();
-                this.selectNode(this._hoveredNode);
-
-                this._isDraggingNode = true;
-
-                this._draggingOffset = new Point(
-                    this._mouseWorldPosition.x - this._selectedNode.position.x,
-                    this._mouseWorldPosition.y - this._selectedNode.position.y
-                );
+                if (this._selectedNode) {
+                    this.deselectNode();
+                }
             }
-        } else {
-            if (this._selectedNode) {
-                this.deselectNode();
-            }
+        }
 
+        if (button == 1) {
             this._isDraggingCamera = true;
         }
 
         App.ui.blur();
     }
 
-    mouseup(): any {
-        if (this._isDraggingNode) this.saveNodes();
-        if (this._isDraggingCamera) this.saveCamera();
+    mouseup(button: number): any {
+        if (button == 0) {
+            if (this._hoveredNode && this._connectingNode && this._hoveredNode != this._connectingNode) {
+                this._connectingNode.addConnection(this._hoveredNode);
+                this._hoveredNode.addConnection(this._connectingNode);
+                this._connectingNode = null;
+                this.saveConnections();
+            }
 
-        if (this._hoveredNode && this._connectingNode && this._hoveredNode != this._connectingNode) {
-            this._connectingNode.addConnection(this._hoveredNode);
-            this._hoveredNode.addConnection(this._connectingNode);
-            this._connectingNode = null;
-            this.saveConnections();
+            if (this._isDraggingNode) {
+                this._isDraggingNode = false;
+                this.saveNodes();
+            }
         }
 
-        this._isDraggingNode = false;
-        this._isDraggingCamera = false;
+        if (button == 1) {
+            this._isDraggingCamera = false;
+            this.saveCamera();
+        }
 
         App.ui.unblur();
     }

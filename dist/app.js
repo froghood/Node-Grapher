@@ -29,9 +29,8 @@ _a = App, _App_preUpdate = function _App_preUpdate() {
     window.addEventListener('resize', () => _a.graph.resize(window.innerWidth, window.innerHeight));
     window.addEventListener('keydown', (e) => _a.graph.keydown(e.key));
     window.addEventListener('mousemove', (e) => _a.graph.mousemove(new Point(e.offsetX, e.offsetY)));
-    window.addEventListener('mousedown', (e) => _a.graph.mousedown(e.shiftKey));
-    window.addEventListener('mouseup', () => _a.graph.mouseup());
+    window.addEventListener('mousedown', (e) => _a.graph.mousedown(e.button, e.shiftKey));
+    window.addEventListener('mouseup', (e) => _a.graph.mouseup(e.button));
     window.addEventListener('wheel', (e) => _a.graph.mousewheel(e.deltaY));
-    //window.addEventListener('contextmenu', (e) => e.preventDefault());
 })();
 export default App;

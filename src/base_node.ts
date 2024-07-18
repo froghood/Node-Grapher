@@ -35,7 +35,7 @@ export default abstract class BaseNode {
 
     abstract preUpdate(): void;
     abstract update(): void;
-    abstract render(ctx: CanvasRenderingContext2D): void;
+    abstract render(): void;
     abstract move(position: Point, offset: Point): void;
     abstract select(): void;
     abstract deselect(): void;

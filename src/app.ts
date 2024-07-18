@@ -15,10 +15,9 @@ export default class App {
         window.addEventListener('keydown', (e) => this.graph.keydown(e.key));
 
         window.addEventListener('mousemove', (e) => this.graph.mousemove(new Point(e.offsetX, e.offsetY)));
-        window.addEventListener('mousedown', (e) => this.graph.mousedown(e.shiftKey));
-        window.addEventListener('mouseup', () => this.graph.mouseup());
+        window.addEventListener('mousedown', (e) => this.graph.mousedown(e.button, e.shiftKey));
+        window.addEventListener('mouseup', (e) => this.graph.mouseup(e.button));
         window.addEventListener('wheel', (e) => this.graph.mousewheel(e.deltaY));
-        //window.addEventListener('contextmenu', (e) => e.preventDefault());
     }
 
     static run() {
