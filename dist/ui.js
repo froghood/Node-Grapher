@@ -1,33 +1,38 @@
 import App from './app.js';
 export default class UI {
     constructor() {
-        this.div = document.getElementById('ui');
-        this.div.addEventListener('mousedown', (e) => e.stopPropagation());
-        this.div.addEventListener('mouseup', (e) => e.stopPropagation());
-        this.div.addEventListener('wheel', (e) => e.stopPropagation());
+        this.properties = document.getElementById('properties');
+        this.properties.addEventListener('mousedown', (e) => e.stopPropagation());
+        this.properties.addEventListener('mouseup', (e) => e.stopPropagation());
+        this.properties.addEventListener('wheel', (e) => e.stopPropagation());
+        this.sourceLink = document.getElementById('sourceLink');
+        this.sourceLink.addEventListener('mousedown', (e) => e.stopPropagation());
+        this.sourceLink.addEventListener('mouseup', (e) => e.stopPropagation());
         this.default();
     }
     blur() {
-        this.div.style.pointerEvents = 'none';
+        this.properties.style.pointerEvents = 'none';
+        this.sourceLink.style.pointerEvents = 'none';
     }
     unblur() {
-        this.div.style.pointerEvents = 'all';
+        this.properties.style.pointerEvents = 'all';
+        this.sourceLink.style.pointerEvents = 'all';
     }
     clear() {
-        this.div.replaceChildren();
+        this.properties.replaceChildren();
     }
     default() {
         this.clear();
-        this.addButton('create node', '', () => {
+        this.addPropertyButton('create node', '', () => {
             App.graph.createNode();
         });
     }
-    addText(text) {
+    addPropertyText(text) {
         const pElement = document.createElement('p');
         pElement.innerText = text;
-        this.div.appendChild(pElement);
+        this.properties.appendChild(pElement);
     }
-    addInput(label, type, value, callback) {
+    addPropertyInput(label, type, value, callback) {
         const labelElement = document.createElement('label');
         labelElement.innerText = label;
         const inputElement = document.createElement('input');
@@ -35,14 +40,14 @@ export default class UI {
         inputElement.value = value;
         inputElement.addEventListener('input', callback);
         labelElement.appendChild(inputElement);
-        this.div.appendChild(labelElement);
+        this.properties.appendChild(labelElement);
     }
-    addButton(label, className, callback) {
+    addPropertyButton(label, className, callback) {
         const buttonElement = document.createElement('button');
         buttonElement.innerText = label;
         buttonElement.className = className;
         buttonElement.addEventListener('click', callback);
-        this.div.appendChild(buttonElement);
+        this.properties.appendChild(buttonElement);
     }
     addConnection(label, callback) {
         console.log('t');
@@ -53,9 +58,9 @@ export default class UI {
         buttonElement.className = 'smallDelete';
         buttonElement.addEventListener('click', (e) => {
             callback(e);
-            this.div.removeChild(labelElement);
+            this.properties.removeChild(labelElement);
         });
         labelElement.appendChild(buttonElement);
-        this.div.appendChild(labelElement);
+        this.properties.appendChild(labelElement);
     }
 }

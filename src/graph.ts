@@ -5,6 +5,7 @@ import Point from './point.js';
 import BaseNode from './base_node.js';
 import Subnode from './subnode.js';
 import { Drawable } from './drawables/drawable.js';
+import { Line } from './drawables/line.js';
 
 export default class Graph {
     private _canvas: HTMLCanvasElement;
@@ -114,7 +115,15 @@ export default class Graph {
             node.render();
         }
 
-        this._ctx.fillStyle = 'rgb(30,30,30)';
+        if (this._connectingNode) {
+            const line = new Line(this._connectingNode.position, this._mouseWorldPosition);
+            line.width = 4;
+            line.color = '#A6A8D580';
+
+            this.draw(line, 5);
+        }
+
+        this._ctx.fillStyle = '#2D2A3B';
         this._ctx.fillRect(0, 0, this._canvas.width, this._canvas.height);
 
         this._ctx.translate(this._canvas.width / 2, this._canvas.height / 2);
@@ -302,19 +311,15 @@ export default class Graph {
     mousedown(button: number, shift: boolean): any {
         if (button == 0) {
             if (this._hoveredNode) {
-                if (shift) {
-                    this._connectingNode = this._hoveredNode;
-                } else {
-                    if (this._selectedNode && this._hoveredNode != this._selectedNode) this.deselectNode();
-                    this.selectNode(this._hoveredNode);
+                if (this._selectedNode && this._hoveredNode != this._selectedNode) this.deselectNode();
+                this.selectNode(this._hoveredNode);
 
-                    this._isDraggingNode = true;
+                this._isDraggingNode = true;
 
-                    this._draggingOffset = new Point(
-                        this._mouseWorldPosition.x - this._selectedNode.position.x,
-                        this._mouseWorldPosition.y - this._selectedNode.position.y
-                    );
-                }
+                this._draggingOffset = new Point(
+                    this._mouseWorldPosition.x - this._selectedNode.position.x,
+                    this._mouseWorldPosition.y - this._selectedNode.position.y
+                );
             } else {
                 if (this._selectedNode) {
                     this.deselectNode();
@@ -326,18 +331,15 @@ export default class Graph {
             this._isDraggingCamera = true;
         }
 
+        if (button == 2) {
+            this._connectingNode = this._hoveredNode;
+        }
+
         App.ui.blur();
     }
 
     mouseup(button: number): any {
         if (button == 0) {
-            if (this._hoveredNode && this._connectingNode && this._hoveredNode != this._connectingNode) {
-                this._connectingNode.addConnection(this._hoveredNode);
-                this._hoveredNode.addConnection(this._connectingNode);
-                this._connectingNode = null;
-                this.saveConnections();
-            }
-
             if (this._isDraggingNode) {
                 this._isDraggingNode = false;
                 this.saveNodes();
@@ -347,6 +349,17 @@ export default class Graph {
         if (button == 1) {
             this._isDraggingCamera = false;
             this.saveCamera();
+        }
+
+        if (button == 2) {
+            if (this._hoveredNode && this._connectingNode && this._hoveredNode != this._connectingNode) {
+                this._connectingNode.addConnection(this._hoveredNode);
+                this._hoveredNode.addConnection(this._connectingNode);
+
+                this.saveConnections();
+            }
+
+            this._connectingNode = null;
         }
 
         App.ui.unblur();

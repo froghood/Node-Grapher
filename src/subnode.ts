@@ -30,13 +30,13 @@ export default class Subnode extends BaseNode {
     select() {
         this._isSelected = true;
         App.ui.clear();
-        App.ui.addText('subnode');
-        App.ui.addInput('label', 'text', this.label, (e) => {
+        App.ui.addPropertyText('subnode');
+        App.ui.addPropertyInput('label', 'text', this.label, (e) => {
             this.label = (<HTMLInputElement>e.target).value;
             App.graph.saveNodes();
         });
         if (this._connections.size > 0) {
-            App.ui.addText('connections');
+            App.ui.addPropertyText('connections');
             for (const connection of this._connections) {
                 App.ui.addConnection(connection.label, () => {
                     this.removeConnection(connection);
@@ -46,7 +46,7 @@ export default class Subnode extends BaseNode {
             }
         }
 
-        App.ui.addButton('delete subnode', 'delete', () => {
+        App.ui.addPropertyButton('delete subnode', 'delete', () => {
             this.delete();
             //App.graph.save();
         });
@@ -128,8 +128,8 @@ export default class Subnode extends BaseNode {
         const circle = new Circle(this.position, this.radius);
         circle.strokeWidth = 4;
         circle.strokeOffset = 1;
-        circle.strokeColor = 'rgb(100,100,140)';
-        circle.fillColor = 'black';
+        circle.strokeColor = '#BEC4E0';
+        circle.fillColor = '#8B89B3';
         App.graph.draw(circle, 3);
 
         this.renderConnections();
@@ -153,7 +153,7 @@ export default class Subnode extends BaseNode {
 
             const line = new Line(this.position, destination);
             line.width = 4;
-            line.color = 'rgb(50,50,100)';
+            line.color = '#696489';
 
             App.graph.draw(line, 2);
         }

@@ -4,7 +4,7 @@ html {
     padding: 0;
 }
 
-#ui {
+#properties {
     position: fixed;
     left: 0;
     bottom: 0;
@@ -76,4 +76,21 @@ button.smallDelete {
     margin-left: 8px;
     padding: 2px 6px;
     display: inline;
+}
+
+#sourceLink {
+    position: absolute;
+    top: 0%;
+    right: 0%;
+    margin: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: sans-serif;
+    color: rgba(255, 255, 255, 0.5);
+    text-decoration: none;
+}
+
+#sourceLink:hover {
+    color: white;
+    text-decoration: underline;
 }

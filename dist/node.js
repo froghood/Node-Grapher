@@ -42,24 +42,24 @@ export default class Node extends BaseNode {
     select() {
         this._isSelected = true;
         App.ui.clear();
-        App.ui.addText('node');
-        App.ui.addInput('label', '', this.label, (e) => {
+        App.ui.addPropertyText('node');
+        App.ui.addPropertyInput('label', '', this.label, (e) => {
             this.label = e.target.value;
             App.graph.saveNodes();
         });
-        App.ui.addInput('radius', 'number', this.radius.toString(), (e) => {
+        App.ui.addPropertyInput('radius', 'number', this.radius.toString(), (e) => {
             this.radius = Number(e.target.value);
             for (const subnode of this._subnodes) {
                 subnode.move(subnode.position, new Point(0, 0));
             }
             App.graph.saveNodes();
         });
-        App.ui.addInput('image', 'url', this._image.imageURL, (e) => {
+        App.ui.addPropertyInput('image', 'url', this._image.imageURL, (e) => {
             this._image.setURL(e.target.value);
             App.graph.saveNodes();
         });
         if (this._connections.size > 0) {
-            App.ui.addText('connections');
+            App.ui.addPropertyText('connections');
             for (const connection of this._connections) {
                 App.ui.addConnection(connection.label.replace('\\n', ' '), () => {
                     this.removeConnection(connection);
@@ -68,11 +68,11 @@ export default class Node extends BaseNode {
                 });
             }
         }
-        App.ui.addButton('create subnode', '', () => {
+        App.ui.addPropertyButton('create subnode', '', () => {
             this.createSubnode();
             App.graph.saveNodes();
         });
-        App.ui.addButton('delete node', 'delete', () => {
+        App.ui.addPropertyButton('delete node', 'delete', () => {
             this.delete();
             //App.graph.saveNodes();
         });
@@ -121,12 +121,18 @@ export default class Node extends BaseNode {
     render() {
         const circle = new Circle(this._position, this.radius);
         circle.strokeWidth = 4;
-        circle.strokeOffset = 1;
-        circle.strokeColor = 'rgb(100,100,140)';
-        circle.fillColor = 'black';
+        circle.strokeOffset = 0;
+        circle.strokeColor = '#00000080';
+        circle.fillColor = '#433F5C';
         if (this._image.isLoaded)
             circle.image = this._image.element;
         App.graph.draw(circle, 1);
+        const outlineCircle = new Circle(this._position, this.radius);
+        outlineCircle.strokeWidth = 4;
+        outlineCircle.strokeOffset = 1;
+        outlineCircle.strokeColor = '#A6A8D5';
+        outlineCircle.fillColor = 'transparent';
+        App.graph.draw(outlineCircle, 1);
         this.renderConnections();
         this.renderLabel();
         if (this._isSelected)
@@ -148,7 +154,7 @@ export default class Node extends BaseNode {
             const destination = new Point(this.position.x + (other.position.x - this.position.x) / 2, this.position.y + (other.position.y - this.position.y) / 2);
             const line = new Line(this.position, destination);
             line.width = 4;
-            line.color = 'rgb(50,50,100)';
+            line.color = '#696489';
             App.graph.draw(line, 0);
         }
     }
