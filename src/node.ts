@@ -63,7 +63,7 @@ export default class Node extends BaseNode {
             App.graph.saveNodes();
         });
         App.ui.addPropertyInput('radius', 'number', this.radius.toString(), (e) => {
-            this.radius = Number((<HTMLInputElement>e.target).value);
+            this.radius = Math.max(Number((<HTMLInputElement>e.target).value), 5);
             for (const subnode of this._subnodes) {
                 subnode.move(subnode.position, new Point(0, 0));
             }

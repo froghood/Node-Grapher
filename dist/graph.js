@@ -22,12 +22,9 @@ export default class Graph {
         this._prevMousePosition = new Point(0, 0);
         this._mouseMovement = new Point(0, 0);
     }
-    get selectedNode() {
-        return this._selectedNode;
-    }
     preUpdate() {
         var _a;
-        if ((_a = this.selectedNode) === null || _a === void 0 ? void 0 : _a.isDeleted) {
+        if ((_a = this._selectedNode) === null || _a === void 0 ? void 0 : _a.isDeleted) {
             this.deselectNode();
         }
         let nodeDeleted = false;
@@ -216,7 +213,7 @@ export default class Graph {
         var _a;
         console.log(key);
         if (key === 'Delete')
-            (_a = this.selectedNode) === null || _a === void 0 ? void 0 : _a.delete();
+            (_a = this._selectedNode) === null || _a === void 0 ? void 0 : _a.delete();
     }
     mousemove(position) {
         this._mousePosition = position;
@@ -270,6 +267,14 @@ export default class Graph {
         this._camera.zoom(-Math.sign(delta));
         this._mouseWorldPosition = this.screenSpaceToWorldSpace(this._mousePosition);
         this.saveCamera();
+    }
+    clear() {
+        this._nodes = [];
+        this._selectedNode = null;
+        this._hoveredNode = null;
+        this._connectingNode = null;
+        this.saveNodes();
+        this.saveConnections();
     }
     getHoveredNode(position) {
         for (let i = this._nodes.length - 1; i >= 0; i--) {

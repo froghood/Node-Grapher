@@ -12,7 +12,7 @@ export class Circle extends Drawable {
     constructor(position: Point, radius: number) {
         super(position);
 
-        this.radius = Math.max(radius, 5);
+        this.radius = radius;
     }
 
     override render(ctx: CanvasRenderingContext2D): void {
@@ -23,7 +23,7 @@ export class Circle extends Drawable {
         ctx.fillStyle = this.fillColor;
 
         ctx.beginPath();
-        ctx.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2);
+        ctx.arc(this.position.x, this.position.y, Math.max(this.radius, 0), 0, Math.PI * 2);
         if (this.image) {
             ctx.save();
             ctx.clip();
@@ -41,9 +41,9 @@ export class Circle extends Drawable {
             ctx.fill();
         }
 
-        const radiusOffset = Math.max(this.radius - this.strokeWidth / 2 + this.strokeWidth * this.strokeOffset, 0);
+        const radiusOffset = this.radius - this.strokeWidth / 2 + this.strokeWidth * this.strokeOffset;
         ctx.beginPath();
-        ctx.arc(this.position.x, this.position.y, radiusOffset, 0, Math.PI * 2);
+        ctx.arc(this.position.x, this.position.y, Math.max(radiusOffset, 0), 0, Math.PI * 2);
         ctx.stroke();
 
         ctx.restore();

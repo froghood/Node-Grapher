@@ -48,12 +48,8 @@ export default class Graph {
         this._mouseMovement = new Point(0, 0);
     }
 
-    get selectedNode(): BaseNode {
-        return this._selectedNode;
-    }
-
     preUpdate() {
-        if (this.selectedNode?.isDeleted) {
+        if (this._selectedNode?.isDeleted) {
             this.deselectNode();
         }
 
@@ -300,7 +296,7 @@ export default class Graph {
     keydown(key: string): void {
         console.log(key);
 
-        if (key === 'Delete') this.selectedNode?.delete();
+        if (key === 'Delete') this._selectedNode?.delete();
     }
 
     mousemove(position: Point): void {
@@ -371,6 +367,16 @@ export default class Graph {
         this._mouseWorldPosition = this.screenSpaceToWorldSpace(this._mousePosition);
 
         this.saveCamera();
+    }
+
+    clear() {
+        this._nodes = [];
+        this._selectedNode = null;
+        this._hoveredNode = null;
+        this._connectingNode = null;
+
+        this.saveNodes();
+        this.saveConnections();
     }
 
     private getHoveredNode(position: Point): BaseNode {
