@@ -37,6 +37,7 @@ export default class UI {
         labelElement.innerText = label;
         const inputElement = document.createElement('input');
         inputElement.type = type;
+        inputElement.min = '5';
         inputElement.value = value;
         inputElement.addEventListener('input', callback);
         labelElement.appendChild(inputElement);

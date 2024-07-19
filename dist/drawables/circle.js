@@ -7,7 +7,7 @@ export class Circle extends Drawable {
         this.strokeColor = 'black';
         this.fillColor = 'white';
         this.image = null;
-        this.radius = radius;
+        this.radius = Math.max(radius, 5);
     }
     render(ctx) {
         ctx.save();
@@ -30,7 +30,7 @@ export class Circle extends Drawable {
         else {
             ctx.fill();
         }
-        const radiusOffset = this.radius - this.strokeWidth / 2 + this.strokeWidth * this.strokeOffset;
+        const radiusOffset = Math.max(this.radius - this.strokeWidth / 2 + this.strokeWidth * this.strokeOffset, 0);
         ctx.beginPath();
         ctx.arc(this.position.x, this.position.y, radiusOffset, 0, Math.PI * 2);
         ctx.stroke();
